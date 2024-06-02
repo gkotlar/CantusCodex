@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1036268086290",
+    "project_id": "cantuscodex-54093",
+    "storage_bucket": "cantuscodex-54093.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036268086290:android:f026994f61f1447332e4cb",
+        "android_client_info": {
+          "package_name": "com.example.cantuscodex"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAp9i2W202piHgwNv4PO5N6GinNbpdGqj4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.cantuscodex.ui.home.HomeFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_gallery"
+        android:name="com.example.cantuscodex.ui.gallery.GalleryFragment"
+        android:label="@string/menu_gallery"
+        tools:layout="@layout/fragment_gallery" />
+
+    <fragment
+        android:id="@+id/nav_slideshow"
+        android:name="com.example.cantuscodex.ui.slideshow.SlideshowFragment"
+        android:label="@string/menu_slideshow"
+        tools:layout="@layout/fragment_slideshow" />
+
+    <fragment
+        android:id="@+id/nav_songs"
+        android:name="com.example.cantuscodex.ui.songs.SongsFragment"
+        android:label="@string/menu_songs"
+        tools:layout="@layout/fragment_songs" />
+
+    <fragment
+        android:id="@+id/nav_events"
+        android:name="com.example.cantuscodex.ui.events.EventsFragment"
+        android:label="@string/menu_events"
+        tools:layout="@layout/fragment_events" />
+
+    <fragment
+        android:id="@+id/nav_logout"
+        android:name="com.example.cantuscodex.ui.login.LoginFragment"
+        android:label="@string/menu_events"
+        tools:layout="@layout/fragment_events" />
+
+</navigation>
