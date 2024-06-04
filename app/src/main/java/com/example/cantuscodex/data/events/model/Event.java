@@ -1,25 +1,37 @@
 package com.example.cantuscodex.data.events.model;
 
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentId;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Event {
-    String Announcer;
-    String Name;
-    Timestamp StartDate;
-    Timestamp ApplicationDeadline;
-    Integer ParticipantLimit;
-    GeoPoint Location;
-    String Organizers;
-    String Description;
-    ArrayList<DocumentReference> Songs;
+
+    public static final String FIELD_ANNOUNCER = "announcer";
+    public static final String FIELD_NAME = "name";
+    public static final String FIELD_ORGANIZERS = "organizers";
+    public static final String FIELD_DESCRIPTION = "description";
+    public static final String FIELD_START_DATE = "startDate";
+    public static final String FIELD_APPLICATION_DEADLINE = "applicationDeadline";
+    public static final String FIELD_PARTICIPANT_LIMIT = "participantLimit";
+    public static final String FIELD_LOCATION = "location";
+    public static final String FIELD_SONGS = "songs";
+
+    @DocumentId
+    private String Id;
+    private String Announcer, Name, Organizers, Description;
+    private Timestamp StartDate, ApplicationDeadline;
+    private Integer ParticipantLimit;
+    private GeoPoint Location;
+    private ArrayList<DocumentReference> Songs;
 
 
-    public Event(String announcer,
+    public Event(String id,
+                 String announcer,
                  String name,
                  Timestamp startDate,
                  Timestamp applicationDeadline,
@@ -29,6 +41,7 @@ public class Event {
                  String description,
                  ArrayList<DocumentReference> songs) {
 
+        Id = id;
         Announcer = announcer;
         Name = name;
         StartDate = startDate;
@@ -38,6 +51,13 @@ public class Event {
         Organizers = organizers;
         Description = description;
         Songs = songs;
+    }
+    public String getId() {
+        return Id;
+    }
+
+    public void setId(String id) {
+        Id = id;
     }
 
     public String getAnnouncer() {

@@ -16,6 +16,8 @@ googleGmsGoogleServices = "4.4.1"
 firebaseAuth = "23.0.0"
 firebaseCommon = "21.0.0"
 firebaseFirestore = "25.0.0"
+legacySupportV4 = "1.0.0"
+firebaseDatabase = "21.0.0"
 
 [libraries]
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
@@ -33,6 +35,8 @@ annotation = { group = "androidx.annotation", name = "annotation", version.ref =
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth"}
 firebase-common = { group = "com.google.firebase", name = "firebase-common", version.ref = "firebaseCommon" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
+legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacySupportV4" }
+firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

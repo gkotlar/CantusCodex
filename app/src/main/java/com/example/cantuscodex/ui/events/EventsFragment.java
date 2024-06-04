@@ -9,8 +9,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
+import com.example.cantuscodex.R;
 import com.example.cantuscodex.databinding.FragmentEventsBinding;
+import com.google.android.material.snackbar.Snackbar;
 
 
 public class EventsFragment extends Fragment {
@@ -27,6 +30,17 @@ public class EventsFragment extends Fragment {
 
         final TextView textView = binding.textEvents;
         eventsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+
+        binding.fabEvents.setOnClickListener(view -> {
+
+            Navigation.findNavController(view).navigate(R.id.nav_new_song);
+
+            Snackbar.make(view, "Events", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null)
+                    .setAnchorView(R.id.fab_events).show();
+
+        });
+
         return root;
     }
 
