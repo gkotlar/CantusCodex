@@ -1,4 +1,4 @@
-package com.example.cantuscodex.ui.newSong;
+package com.example.cantuscodex.ui.newEvent;
 
 import android.util.Log;
 
@@ -6,25 +6,25 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class NewSongViewModel extends ViewModel {
+public class NewEventViewModel extends ViewModel {
     private final MutableLiveData<String> nameText;
-    private final MutableLiveData<String> contentText;
-    private final MutableLiveData<String> originText;
     private final MutableLiveData<String> descriptionText;
+    private final MutableLiveData<String> organizersText;
+    private final MutableLiveData<String> participantLimitText;
     private final MutableLiveData<String> createText;
     private final MutableLiveData<String> cancelText;
 
 
 
-    public NewSongViewModel() {
+    public NewEventViewModel() {
         nameText = new MutableLiveData<>();
-        nameText.setValue("Name:");
+        nameText.setValue("Event Name:");
 
-        contentText = new MutableLiveData<>();
-        contentText.setValue("Content:");
+        organizersText = new MutableLiveData<>();
+        organizersText.setValue("Organizers:");
 
-        originText = new MutableLiveData<>();
-        originText.setValue("Origin:");
+        participantLimitText = new MutableLiveData<>();
+        participantLimitText.setValue("Maximum participants:");
 
         descriptionText = new MutableLiveData<>();
         descriptionText.setValue("Description:");
@@ -39,11 +39,11 @@ public class NewSongViewModel extends ViewModel {
     public LiveData<String> getNameText() {
         return nameText;
     }
-    public LiveData<String> getContentText() {
-        return contentText;
+    public LiveData<String> getOrganizersText() {
+        return organizersText;
     }
-    public LiveData<String> getOriginText() {
-        return originText;
+    public LiveData<String> getParticipantLimitText() {
+        return participantLimitText;
     }
     public LiveData<String> getDescriptionText() {
         return descriptionText;

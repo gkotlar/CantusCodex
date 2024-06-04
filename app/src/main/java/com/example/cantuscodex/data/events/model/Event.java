@@ -3,11 +3,14 @@ package com.example.cantuscodex.data.events.model;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentId;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Event {
 
@@ -30,8 +33,7 @@ public class Event {
     private ArrayList<DocumentReference> Songs;
 
 
-    public Event(String id,
-                 String announcer,
+    public Event(String announcer,
                  String name,
                  Timestamp startDate,
                  Timestamp applicationDeadline,
@@ -41,7 +43,6 @@ public class Event {
                  String description,
                  ArrayList<DocumentReference> songs) {
 
-        Id = id;
         Announcer = announcer;
         Name = name;
         StartDate = startDate;
@@ -132,4 +133,19 @@ public class Event {
         Songs = songs;
     }
 
+    @Exclude
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put(FIELD_ANNOUNCER, getAnnouncer());
+        result.put(FIELD_NAME, getName());
+        result.put(FIELD_ORGANIZERS, getOrganizers());
+        result.put(FIELD_DESCRIPTION, getDescription());
+        result.put(FIELD_LOCATION, getLocation());
+        result.put(FIELD_APPLICATION_DEADLINE, getApplicationDeadline());
+        result.put(FIELD_START_DATE, getStartDate());
+        result.put(FIELD_PARTICIPANT_LIMIT, getParticipantLimit());
+        result.put(FIELD_SONGS, getSongs());
+
+        return result;
+    }
 }
