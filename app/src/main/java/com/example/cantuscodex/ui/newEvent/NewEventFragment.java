@@ -1,7 +1,6 @@
 package com.example.cantuscodex.ui.newEvent;
 
 import com.example.cantuscodex.data.events.model.Event;
-import com.example.cantuscodex.data.users.model.User;
 import com.example.cantuscodex.databinding.FragmentNewEventBinding;
 
 import androidx.annotation.Nullable;
@@ -9,6 +8,8 @@ import androidx.annotation.NonNull;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -24,25 +25,23 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.type.DateTime;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 public class NewEventFragment extends Fragment {
@@ -51,7 +50,7 @@ public class NewEventFragment extends Fragment {
     private static final String TAG = "NewEventFragment";
     private static final String REQUIRED = "Required";
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
+  //  private DatabaseReference mDatabase;
     private FirebaseFirestore firestore;
 
 
@@ -64,7 +63,7 @@ public class NewEventFragment extends Fragment {
         binding = FragmentNewEventBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textViewAplicationDeadline = binding.textApplicationDeadlineNewEvent;
+        final TextView textViewApplicationDeadline = binding.textApplicationDeadlineNewEvent;
         final TextView textViewStartDate = binding.textStartDateNewEvent;
         final TextView textViewLocation = binding.textLocationNewEvent;
 
@@ -89,20 +88,65 @@ public class NewEventFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+      //  mDatabase = FirebaseDatabase.getInstance().getReference();
         firestore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        binding.btnCreateNewEvent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                submitPost();
-            }
-        });
-
+        binding.btnCreateNewEvent.setOnClickListener(v -> submitPost());
         binding.btnCancelNewEvent.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+
+        binding.textApplicationDeadlineNewEvent.setOnClickListener(v -> getDate(v));
+        binding.textStartDateNewEvent.setOnClickListener(v -> getDate(v));
+
     }
 
+    private void getDate(View viewe){
+
+        final Calendar cldr = Calendar.getInstance();
+        int day = cldr.get(Calendar.DAY_OF_MONTH);
+        int month = cldr.get(Calendar.MONTH);
+        int year = cldr.get(Calendar.YEAR);
+        int hour = cldr.get(Calendar.HOUR_OF_DAY);
+        int minute = cldr.get(Calendar.MINUTE);
+
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(NewEventFragment.this.getContext(),
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int day) {
+                        Calendar mCalendar = Calendar.getInstance();
+                        mCalendar.set(Calendar.YEAR, year);
+                        mCalendar.set(Calendar.MONTH, month);
+                        mCalendar.set(Calendar.DAY_OF_MONTH, day);
+                        String selectedDate = DateFormat.getDateInstance(DateFormat.SHORT).format(mCalendar.getTime());
+                        //lectureDate.setText(selectedDate);
+
+
+                        // on below line we are initializing our Time Picker Dialog
+                        TimePickerDialog timePickerDialog = new TimePickerDialog(NewEventFragment.this.getContext(),
+                                new TimePickerDialog.OnTimeSetListener() {
+                                    @Override
+                                    public void onTimeSet(TimePicker view, int hour, int minute) {
+                                        Calendar mCalendar = Calendar.getInstance();
+                                        mCalendar.set(Calendar.HOUR, hour);
+                                        mCalendar.set(Calendar.MINUTE, minute);
+
+                                        Log.i(TAG, "getDate: Year"+ year+ " Month: " + month+ " Day " + day + " Hour: " + hour + " Minute: " + minute);
+                                        cldr.set(year, month, day, hour, minute);
+                                        int id = viewe.getId();
+                                        Button btn = viewe.findViewById(id);
+                                        btn.setText(cldr.get(Calendar.YEAR)+ "/" +cldr.get(Calendar.MONTH) + "/" +cldr.get(Calendar.DAY_OF_MONTH)+ " " + cldr.get(Calendar.HOUR) + ":" +cldr.get(Calendar.MINUTE));
+                                    }
+                                }, hour, minute, false);
+                        // at last we are calling show to
+                        // display our time picker dialog.
+                        timePickerDialog.show();
+
+                    }
+                },year, month, day );
+
+        datePickerDialog.show();
+    };
     private void submitPost() {
         final String name = binding.editNameNewEvent.getText().toString();
         final String paxLimit = binding.editParticipantLimitNewEvent.getText().toString();
@@ -140,34 +184,38 @@ public class NewEventFragment extends Fragment {
         setEditingEnabled(false);
         Toast.makeText(getContext(), "Posting...", Toast.LENGTH_SHORT).show();
 
-        final String userId = mAuth.getUid();
+//        mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
+//                new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        // Get user value
+//                        User user = dataSnapshot.getValue(User.class);
+//
+//                        if (user == null) {
+//                            // User is null, error out
+//                            Toast.makeText(getContext(),
+//                                    "Error: could not fetch user.",
+//                                    Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            // Write new post
+//                            writeNewPost(userId, name, startDate, applicationDeadline, participantLimit, location,  organizers, description, songs);
+//                        }
+//
+//                        setEditingEnabled(true);
+//                        NavHostFragment.findNavController(NewEventFragment.this).popBackStack();
+//                    }
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//                        Log.w(TAG, "getUser:onCancelled", databaseError.toException());
+//                        setEditingEnabled(true);
+//                    }
+//                });
 
-        mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        // Get user value
-                        User user = dataSnapshot.getValue(User.class);
 
-                        if (user == null) {
-                            // User is null, error out
-                            Toast.makeText(getContext(),
-                                    "Error: could not fetch user.",
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            // Write new post
-                            writeNewPost(userId, name, startDate, applicationDeadline, participantLimit, location,  organizers, description, songs);
-                        }
+        writeNewPost(announcer, name, startDate, applicationDeadline, participantLimit, location,  organizers, description, songs);
+        NavHostFragment.findNavController(NewEventFragment.this).popBackStack();
+        setEditingEnabled(true);
 
-                        setEditingEnabled(true);
-                        NavHostFragment.findNavController(NewEventFragment.this).popBackStack();
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-                        setEditingEnabled(true);
-                    }
-                });
     }
 
     private void setEditingEnabled(boolean enabled) {
@@ -187,32 +235,26 @@ public class NewEventFragment extends Fragment {
                               String organizers,
                               String description,
                               ArrayList<DocumentReference> songs) {
+
         // Create new post at /user-posts/$userid/$postid and at
         // /posts/$postid simultaneously
+        // String key = mDatabase.child("events").push().getKey();
+        // Log.d(TAG, "writeNewPost: key = " + key);
 
-        String key = mDatabase.child("events").push().getKey();
-        Log.d(TAG, "writeNewPost: key = " + key);
         Event event = new Event(announcer, name, startDate, applicationDeadline, participantLimit, location,  organizers, description, songs);
         Map<String, Object> eventValues = event.toMap();
 
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/events/" + key, eventValues);
-        //   childUpdates.put("/event-events/" + id + "/" + key, eventValues);
+        // Map<String, Object> childUpdates = new HashMap<>();
+        // childUpdates.put("/events/" + key, eventValues);
+        // childUpdates.put("/event-events/" + id + "/" + key, eventValues);
+        // mDatabase.updateChildren(childUpdates);
 
-        mDatabase.updateChildren(childUpdates);
 
-
-        firestore.collection("events").add(event).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-            @Override
-            public void onSuccess(DocumentReference documentReference) {
-                Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.w(TAG, "Error adding document", e);
-            }
-        });
+        firestore.collection("events").add(eventValues)
+                .addOnSuccessListener(documentReference ->
+                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId()))
+                .addOnFailureListener(e ->
+                        Log.w(TAG, "Error adding document", e));
     }
 
     @Override

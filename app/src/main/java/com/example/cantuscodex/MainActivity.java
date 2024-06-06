@@ -1,6 +1,7 @@
 package com.example.cantuscodex;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -8,7 +9,9 @@ import android.view.View;
 import android.view.Menu;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.cantuscodex.data.users.model.User;
 import com.example.cantuscodex.ui.newSong.NewSongFragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
@@ -35,9 +38,9 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
-
-
-
+    private SharedPreferences mPreferences;
+    private String sharedPrefsFile = "com.example.cantuscodex";
+    private SharedPreferences.OnSharedPreferenceChangeListener listener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        mPreferences = getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
+
 
         setSupportActionBar(binding.appBarMain.toolbar);
         DrawerLayout drawer = binding.drawerLayout;
@@ -68,6 +74,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(@NonNull MenuItem item) {
                 mAuth.signOut();
+                SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+                preferencesEditor.clear();
+                preferencesEditor.apply();
                 navController.popBackStack(R.id.nav_login, false);
                 navController.navigate(R.id.nav_login);
                 return false;
@@ -77,13 +86,16 @@ public class MainActivity extends AppCompatActivity {
         View headerRoot = binding.navView.getHeaderView(0);
         TextView UserMail = headerRoot.findViewById(R.id.header_mail);
 
-        if (mAuth.getCurrentUser() != null){
+        UserMail.setText(mPreferences.getString(User.FIELD_EMAIL, "Error"));
 
-            UserMail.setText(mAuth.getCurrentUser().getEmail());
-        }else {
-            UserMail.setText("reg");
-        }
-
+        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (key == User.FIELD_EMAIL) {
+                    UserMail.setText(mPreferences.getString(User.FIELD_EMAIL, "Error"));
+                }
+            }
+        };
     }
 
     @Override
@@ -91,6 +103,17 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mPreferences.unregisterOnSharedPreferenceChangeListener(listener);
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mPreferences.registerOnSharedPreferenceChangeListener(listener);
     }
 
     @Override

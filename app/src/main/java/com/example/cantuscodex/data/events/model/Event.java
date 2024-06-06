@@ -14,6 +14,7 @@ import java.util.Map;
 
 public class Event {
 
+    public static final String FIELD_CLASSNAME = "events";
     public static final String FIELD_ANNOUNCER = "announcer";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_ORGANIZERS = "organizers";
@@ -24,14 +25,15 @@ public class Event {
     public static final String FIELD_LOCATION = "location";
     public static final String FIELD_SONGS = "songs";
 
-    @DocumentId
-    private String Id;
     private String Announcer, Name, Organizers, Description;
     private Timestamp StartDate, ApplicationDeadline;
     private Integer ParticipantLimit;
     private GeoPoint Location;
     private ArrayList<DocumentReference> Songs;
 
+    public Event() {
+
+    }
 
     public Event(String announcer,
                  String name,
@@ -53,14 +55,6 @@ public class Event {
         Description = description;
         Songs = songs;
     }
-    public String getId() {
-        return Id;
-    }
-
-    public void setId(String id) {
-        Id = id;
-    }
-
     public String getAnnouncer() {
         return Announcer;
     }

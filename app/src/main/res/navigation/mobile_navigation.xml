@@ -35,6 +35,26 @@
         android:label="@string/menu_new_song"
         tools:layout="@layout/fragment_new_song" />
 
+    <fragment
+        android:id="@+id/nav_new_event"
+        android:name="com.example.cantuscodex.ui.newEvent.NewEventFragment"
+        android:label="@string/menu_new_event"
+        tools:layout="@layout/fragment_new_event" />
+
+    <fragment
+        android:id="@+id/nav_song_details"
+        android:name="com.example.cantuscodex.ui.details.SongDetailsFragment"
+        android:label="@string/menu_song_details"
+        tools:layout="@layout/fragment_song_details"
+        />
+
+    <fragment
+        android:id="@+id/nav_event_details"
+        android:name="com.example.cantuscodex.ui.details.EventDetailsFragment"
+        android:label="@string/menu_event_details"
+        tools:layout="@layout/fragment_event_details"
+        />
+
 
 
 </navigation>

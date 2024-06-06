@@ -1,8 +1,6 @@
 package com.example.cantuscodex.ui.newSong;
 
-import com.example.cantuscodex.R;
 import com.example.cantuscodex.data.songs.model.Song;
-import com.example.cantuscodex.data.users.model.User;
 import com.example.cantuscodex.databinding.FragmentNewSongBinding;
 
 
@@ -29,19 +27,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class NewSongFragment extends Fragment {
@@ -50,11 +39,8 @@ public class NewSongFragment extends Fragment {
     private static final String TAG = "NewSongFragment";
     private static final String REQUIRED = "Required";
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
-
+    //private DatabaseReference mDatabase;
     private FirebaseFirestore firestore;
-
-
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -85,17 +71,11 @@ public class NewSongFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        //mDatabase = FirebaseDatabase.getInstance().getReference();
         firestore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        binding.btnCreateNewSong.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                submitPost();
-            }
-        });
-
+        binding.btnCreateNewSong.setOnClickListener(v -> submitPost());
         binding.btnCancelNewSong.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
     }
 
@@ -131,33 +111,36 @@ public class NewSongFragment extends Fragment {
         Toast.makeText(getContext(), "Posting...", Toast.LENGTH_SHORT).show();
 
         final String userId = mAuth.getUid();
+        //mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
+        //                new ValueEventListener() {
+        //                    @Override
+        //                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        //                        // Get user value
+        //                        User user = dataSnapshot.getValue(User.class);
+        //
+        //                        if (user == null) {
+        //                            // User is null, error out
+        //                            Toast.makeText(getContext(),
+        //                                    "Error: could not fetch user.",
+        //                                    Toast.LENGTH_SHORT).show();
+        //                        } else {
+        //                            // Write new post
+        //                            writeNewPost(userId, name, content, origin, description);
+        //                        }
+        //
+        //                        setEditingEnabled(true);
+        //                        NavHostFragment.findNavController(NewSongFragment.this).popBackStack();
+        //                    }
+        //                    @Override
+        //                    public void onCancelled(@NonNull DatabaseError databaseError) {
+        //                        Log.w(TAG, "getUser:onCancelled", databaseError.toException());
+        //                        setEditingEnabled(true);
+        //                    }
+        //                });
 
-        mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        // Get user value
-                        User user = dataSnapshot.getValue(User.class);
-
-                        if (user == null) {
-                            // User is null, error out
-                            Toast.makeText(getContext(),
-                                    "Error: could not fetch user.",
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            // Write new post
-                            writeNewPost(userId, name, content, origin, description);
-                        }
-
-                        setEditingEnabled(true);
-                        NavHostFragment.findNavController(NewSongFragment.this).popBackStack();
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-                        setEditingEnabled(true);
-                    }
-                });
+        writeNewPost(userId, name, content, origin, description);
+        setEditingEnabled(true);
+        NavHostFragment.findNavController(NewSongFragment.this).popBackStack();
     }
 
     private void setEditingEnabled(boolean enabled) {
@@ -171,30 +154,21 @@ public class NewSongFragment extends Fragment {
     private void writeNewPost(String id, String name, String content, String origin, String description) {
         // Create new post at /user-posts/$userid/$postid and at
         // /posts/$postid simultaneously
+        // String key = mDatabase.child("songs").push().getKey();
+        // Log.d(TAG, "writeNewPost: key = " + key);
+        //Map<String, Object> childUpdates = new HashMap<>();
+        // childUpdates.put("/songs/" + key, songValues);
+        // childUpdates.put("/event-songs/" + id + "/" + key, songValues);
+        // mDatabase.updateChildren(childUpdates);
 
-        String key = mDatabase.child("songs").push().getKey();
-        Log.d(TAG, "writeNewPost: key = " + key);
         Song song = new Song(id, name, content, origin, description);
         Map<String, Object> songValues = song.toMap();
 
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/songs/" + key, songValues);
-     //   childUpdates.put("/event-songs/" + id + "/" + key, songValues);
-
-        mDatabase.updateChildren(childUpdates);
-
-
-        firestore.collection("songs").add(song).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-            @Override
-            public void onSuccess(DocumentReference documentReference) {
-                Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.w(TAG, "Error adding document", e);
-            }
-        });
+        firestore.collection("songs").add(songValues)
+                .addOnSuccessListener(documentReference ->
+                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId()))
+                .addOnFailureListener(e ->
+                        Log.w(TAG, "Error adding document", e));
     }
 
     @Override

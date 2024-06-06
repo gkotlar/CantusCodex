@@ -1,5 +1,8 @@
 package com.example.cantuscodex.ui.login;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -21,17 +24,22 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Map;
 
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = "LoginFragment";
-    private DatabaseReference mDatabase;
+    private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
     private FragmentLoginBinding binding;
+
+    private SharedPreferences mPreferences;
+    private String sharedPrefsFile = "com.example.cantuscodex";
+    private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
     @Nullable
     @Override
@@ -41,6 +49,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         LoginViewModel loginViewModel =
                 new ViewModelProvider(this).get(LoginViewModel.class);
         binding = FragmentLoginBinding.inflate(inflater, container, false);
+        mPreferences = getActivity().getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
 
         View root = binding.getRoot();
 
@@ -50,7 +59,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        firestore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
         // Click listeners
@@ -64,7 +73,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
         // Check auth on Activity start
         if (mAuth.getCurrentUser() != null) {
-            onAuthSuccess(mAuth.getCurrentUser());
+            onAuthSuccess(mAuth.getUid());
         }
     }
 
@@ -84,7 +93,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                         Log.d(TAG, "signIn:onComplete:" + task.isSuccessful());
 
                         if (task.isSuccessful()) {
-                            onAuthSuccess(task.getResult().getUser());
+                            onAuthSuccess(task.getResult().getUser().getUid());
                         } else {
                             Toast.makeText(getContext(), "Sign In Failed",
                                     Toast.LENGTH_SHORT).show();
@@ -101,6 +110,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
         String email = binding.fieldEmail.getText().toString();
         String password = binding.fieldPassword.getText().toString();
+        boolean admin = binding.checkboxAdmin.isChecked();
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
@@ -109,7 +119,12 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                         Log.d(TAG, "createUser:onComplete:" + task.isSuccessful());
 
                         if (task.isSuccessful()) {
-                            onAuthSuccess(task.getResult().getUser());
+                            String userId = task.getResult().getUser().getUid();
+                            String username = usernameFromEmail(email);
+
+                            onAuthSuccess(userId);
+                            // Write new user
+                            writeNewUser(userId, username, email, admin);
                         } else {
                             Toast.makeText(getContext(), "Sign Up Failed",
                                     Toast.LENGTH_SHORT).show();
@@ -118,13 +133,24 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 });
     }
 
-    private void onAuthSuccess(FirebaseUser user) {
-        String username = usernameFromEmail(user.getEmail());
-        // Write new user
-        writeNewUser(user.getUid(), username, user.getEmail());
+    private void onAuthSuccess(String userId) {
         // Go to MainFragment
+        firestore.collection(User.FIELD_CLASSNAME).document(userId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    User user = documentSnapshot.toObject(User.class);
+
+                    Log.wtf(TAG, "onAuthSuccess() returned: " + documentSnapshot.toString());
+
+                    SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+                    preferencesEditor.putBoolean(User.FIELD_IS_ADMIN, user.isAdmin());
+                    preferencesEditor.putString(User.FIELD_USERNAME, user.getUsername());
+                    preferencesEditor.putString(User.FIELD_EMAIL, user.getEmail());
+                    preferencesEditor.apply();
+                });
+
         NavHostFragment.findNavController(this).navigate(R.id.nav_home);
     }
+
 
     private String usernameFromEmail(String email) {
         if (email.contains("@")) {
@@ -153,10 +179,12 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         return result;
     }
 
-    private void writeNewUser(String userId, String name, String email) {
-        User user = new User(name, email);
+    private void writeNewUser(String userId, String name, String email, boolean admin) {
+        User user = new User(name, email, admin);
+        Map<String, Object> userValues = user.toMap();
+        Log.d(TAG, "writeNewUser: "+userValues.toString());
+        firestore.collection(User.FIELD_CLASSNAME).document(userId).set(userValues);
 
-        mDatabase.child("users").child(userId).setValue(user);
     }
 
     public void onClick(View v) {

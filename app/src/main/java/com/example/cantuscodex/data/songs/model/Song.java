@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Song {
+    public static final String FIELD_CLASSNAME = "songs";
+
     public static final String FIELD_USER_ID = "userId";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_CONTENT = "content";
