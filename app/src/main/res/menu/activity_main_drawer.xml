@@ -17,9 +17,14 @@
             android:icon="@drawable/ic_menu_events"
             android:title="@string/menu_events" />
         <item
+            android:id="@+id/nav_bookmarked_events"
+            android:icon="@drawable/card_bookmark_filled"
+            android:title="@string/menu_bookmarked_events" />
+        <item
             android:id="@+id/nav_login"
             android:icon="@drawable/ic_menu_logout"
             android:title="@string/menu_logout" />
+
 
     </group>
 

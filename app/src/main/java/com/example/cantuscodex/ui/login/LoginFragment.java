@@ -5,7 +5,6 @@ import static android.content.Context.MODE_PRIVATE;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,15 +13,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.cantuscodex.R;
 import com.example.cantuscodex.data.users.model.User;
 import com.example.cantuscodex.databinding.FragmentLoginBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
+
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -38,22 +34,19 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private FragmentLoginBinding binding;
 
     private SharedPreferences mPreferences;
-    private String sharedPrefsFile = "com.example.cantuscodex";
-    private SharedPreferences.OnSharedPreferenceChangeListener listener;
+    private final String sharedPrefsFile = "com.example.cantuscodex";
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        LoginViewModel loginViewModel =
-                new ViewModelProvider(this).get(LoginViewModel.class);
+       // LoginViewModel loginViewModel =
+        //        new ViewModelProvider(this).get(LoginViewModel.class);
         binding = FragmentLoginBinding.inflate(inflater, container, false);
-        mPreferences = getActivity().getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
+        mPreferences = requireActivity().getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
 
-        View root = binding.getRoot();
-
-        return root;
+        return binding.getRoot();
     }
 
     @Override
@@ -78,7 +71,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     }
 
     private void signIn() {
-        Log.d(TAG, "signIn");
         if (!validateForm()) {
             return;
         }
@@ -87,23 +79,17 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         String password = binding.fieldPassword.getText().toString();
 
         mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signIn:onComplete:" + task.isSuccessful());
-
-                        if (task.isSuccessful()) {
-                            onAuthSuccess(task.getResult().getUser().getUid());
-                        } else {
-                            Toast.makeText(getContext(), "Sign In Failed",
-                                    Toast.LENGTH_SHORT).show();
-                        }
+                .addOnCompleteListener(requireActivity(), task -> {
+                    if (task.isSuccessful()) {
+                        onAuthSuccess(task.getResult().getUser().getUid());
+                    } else {
+                        Toast.makeText(getContext(), "Sign In Failed",
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
     private void signUp() {
-        Log.d(TAG, "signUp");
         if (!validateForm()) {
             return;
         }
@@ -113,22 +99,17 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         boolean admin = binding.checkboxAdmin.isChecked();
 
         mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "createUser:onComplete:" + task.isSuccessful());
+                .addOnCompleteListener(requireActivity(), task -> {
+                    if (task.isSuccessful()) {
+                        String userId = task.getResult().getUser().getUid();
+                        String username = usernameFromEmail(email);
 
-                        if (task.isSuccessful()) {
-                            String userId = task.getResult().getUser().getUid();
-                            String username = usernameFromEmail(email);
-
-                            onAuthSuccess(userId);
-                            // Write new user
-                            writeNewUser(userId, username, email, admin);
-                        } else {
-                            Toast.makeText(getContext(), "Sign Up Failed",
-                                    Toast.LENGTH_SHORT).show();
-                        }
+                        onAuthSuccess(userId);
+                        // Write new user
+                        writeNewUser(userId, username, email, admin);
+                    } else {
+                        Toast.makeText(getContext(), "Sign Up Failed",
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -138,9 +119,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         firestore.collection(User.FIELD_CLASSNAME).document(userId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     User user = documentSnapshot.toObject(User.class);
-
-                    Log.wtf(TAG, "onAuthSuccess() returned: " + documentSnapshot.toString());
-
                     SharedPreferences.Editor preferencesEditor = mPreferences.edit();
                     preferencesEditor.putBoolean(User.FIELD_IS_ADMIN, user.isAdmin());
                     preferencesEditor.putString(User.FIELD_USERNAME, user.getUsername());
@@ -182,7 +160,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private void writeNewUser(String userId, String name, String email, boolean admin) {
         User user = new User(name, email, admin);
         Map<String, Object> userValues = user.toMap();
-        Log.d(TAG, "writeNewUser: "+userValues.toString());
         firestore.collection(User.FIELD_CLASSNAME).document(userId).set(userValues);
 
     }

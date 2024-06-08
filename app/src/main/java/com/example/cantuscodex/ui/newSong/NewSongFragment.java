@@ -39,7 +39,6 @@ public class NewSongFragment extends Fragment {
     private static final String TAG = "NewSongFragment";
     private static final String REQUIRED = "Required";
     private FirebaseAuth mAuth;
-    //private DatabaseReference mDatabase;
     private FirebaseFirestore firestore;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -71,7 +70,6 @@ public class NewSongFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //mDatabase = FirebaseDatabase.getInstance().getReference();
         firestore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
@@ -111,33 +109,6 @@ public class NewSongFragment extends Fragment {
         Toast.makeText(getContext(), "Posting...", Toast.LENGTH_SHORT).show();
 
         final String userId = mAuth.getUid();
-        //mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
-        //                new ValueEventListener() {
-        //                    @Override
-        //                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-        //                        // Get user value
-        //                        User user = dataSnapshot.getValue(User.class);
-        //
-        //                        if (user == null) {
-        //                            // User is null, error out
-        //                            Toast.makeText(getContext(),
-        //                                    "Error: could not fetch user.",
-        //                                    Toast.LENGTH_SHORT).show();
-        //                        } else {
-        //                            // Write new post
-        //                            writeNewPost(userId, name, content, origin, description);
-        //                        }
-        //
-        //                        setEditingEnabled(true);
-        //                        NavHostFragment.findNavController(NewSongFragment.this).popBackStack();
-        //                    }
-        //                    @Override
-        //                    public void onCancelled(@NonNull DatabaseError databaseError) {
-        //                        Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-        //                        setEditingEnabled(true);
-        //                    }
-        //                });
-
         writeNewPost(userId, name, content, origin, description);
         setEditingEnabled(true);
         NavHostFragment.findNavController(NewSongFragment.this).popBackStack();
@@ -152,14 +123,6 @@ public class NewSongFragment extends Fragment {
     }
 
     private void writeNewPost(String id, String name, String content, String origin, String description) {
-        // Create new post at /user-posts/$userid/$postid and at
-        // /posts/$postid simultaneously
-        // String key = mDatabase.child("songs").push().getKey();
-        // Log.d(TAG, "writeNewPost: key = " + key);
-        //Map<String, Object> childUpdates = new HashMap<>();
-        // childUpdates.put("/songs/" + key, songValues);
-        // childUpdates.put("/event-songs/" + id + "/" + key, songValues);
-        // mDatabase.updateChildren(childUpdates);
 
         Song song = new Song(id, name, content, origin, description);
         Map<String, Object> songValues = song.toMap();

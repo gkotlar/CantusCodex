@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.cantuscodex.R;
 import com.example.cantuscodex.data.songs.model.Song;
 import com.example.cantuscodex.databinding.CardSongsBinding;
 
@@ -20,14 +21,9 @@ import com.google.firebase.firestore.Query;
 public class SongAdapter extends FirestoreAdapter<SongAdapter.ViewHolder> {
 
     public interface OnSongSelectedListener {
-
         void onSongSelected(DocumentSnapshot song);
-
     }
-
     private OnSongSelectedListener mListener;
-
-
     public SongAdapter(Query query, OnSongSelectedListener listener) {
         super(query);
         mListener = listener;
@@ -63,20 +59,22 @@ public class SongAdapter extends FirestoreAdapter<SongAdapter.ViewHolder> {
             Song song = snapshot.toObject(Song.class);
             Resources resources = itemView.getResources();
 
+
             binding.tvName.setText(song.getName());
             binding.tvDescription.setText(song.getDescription());
             binding.tvOrigin.setText(song.getOrigin());
 
-
             // Click listener
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (listener != null) {
-                        listener.onSongSelected(snapshot);
-                    }
+            itemView.setOnClickListener(view -> {
+                if (listener != null) {
+                    listener.onSongSelected(snapshot);
+                    binding.getRoot().setBackgroundColor(binding.getRoot().getResources().getColor(R.color.purple_200));
                 }
             });
+
+            binding.ivBookmarkSongs.setOnClickListener(v ->
+                    binding.ivBookmarkSongs.setImageResource(R.drawable.card_bookmark_filled));
+
         }
     }
 

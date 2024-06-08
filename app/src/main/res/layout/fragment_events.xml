@@ -6,8 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.events.EventsFragment">
 
-
-
     <TextView
         android:id="@+id/text_events"
         android:layout_width="match_parent"
@@ -24,11 +22,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/events_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/text_events"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/card_songs"
         />
-
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_events"
@@ -37,9 +34,10 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="16dp"
+        android:contentDescription="@string/fab_transformation_scrim_behavior"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        app:srcCompat="@drawable/baseline_create_24" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

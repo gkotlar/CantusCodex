@@ -54,7 +54,11 @@
         android:label="@string/menu_event_details"
         tools:layout="@layout/fragment_event_details"
         />
-
-
+    <fragment
+        android:id="@+id/nav_bookmarked_events"
+        android:name="com.example.cantuscodex.ui.bookmarked_events.BookmarkedEventsFragment"
+        android:label="@string/menu_bookmarked_events"
+        tools:layout="@layout/fragment_bookmarked_events"
+        />
 
 </navigation>

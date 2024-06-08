@@ -1,18 +1,16 @@
-package com.example.cantuscodex.ui.home;
+package com.example.cantuscodex.ui.bookmarked_events;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.firebase.auth.FirebaseAuth;
-
-public class HomeViewModel extends ViewModel {
+public class BookmarkedEventsViewModel extends ViewModel {
 
     private final MutableLiveData<String> mText;
 
-    public HomeViewModel() {
+    public BookmarkedEventsViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("Welcome "+ FirebaseAuth.getInstance().getCurrentUser().getEmail());
+        mText.setValue("No events present");
     }
 
     public LiveData<String> getText() {

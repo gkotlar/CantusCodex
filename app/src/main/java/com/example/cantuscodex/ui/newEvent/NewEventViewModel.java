@@ -1,7 +1,5 @@
 package com.example.cantuscodex.ui.newEvent;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -11,6 +9,7 @@ public class NewEventViewModel extends ViewModel {
     private final MutableLiveData<String> descriptionText;
     private final MutableLiveData<String> organizersText;
     private final MutableLiveData<String> participantLimitText;
+    private final MutableLiveData<String> locationText;
     private final MutableLiveData<String> createText;
     private final MutableLiveData<String> cancelText;
 
@@ -28,6 +27,9 @@ public class NewEventViewModel extends ViewModel {
 
         descriptionText = new MutableLiveData<>();
         descriptionText.setValue("Description:");
+
+        locationText = new MutableLiveData<>();
+        locationText.setValue("Location:");
 
         createText = new MutableLiveData<>();
         createText.setValue("Create");
@@ -48,6 +50,10 @@ public class NewEventViewModel extends ViewModel {
     public LiveData<String> getDescriptionText() {
         return descriptionText;
     }
+    public LiveData<String> getLocationText() {
+        return locationText;
+    }
+
     public LiveData<String> getCreateText() { return createText; }
     public LiveData<String> getCancelText() { return cancelText; }
 

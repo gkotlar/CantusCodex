@@ -1,6 +1,10 @@
 package com.example.cantuscodex.ui.newEvent;
 
+import com.example.cantuscodex.R;
+import com.example.cantuscodex.adapter.EventAdapter;
+import com.example.cantuscodex.adapter.SongAdapter;
 import com.example.cantuscodex.data.events.model.Event;
+import com.example.cantuscodex.data.songs.model.Song;
 import com.example.cantuscodex.databinding.FragmentNewEventBinding;
 
 import androidx.annotation.Nullable;
@@ -16,6 +20,7 @@ import androidx.fragment.app.Fragment;
 
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -25,34 +30,37 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
-import com.google.type.DateTime;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Map;
+import java.util.function.Consumer;
 
-public class NewEventFragment extends Fragment {
+public class NewEventFragment extends Fragment implements SongAdapter.OnSongSelectedListener {
 
     private FragmentNewEventBinding binding;
     private static final String TAG = "NewEventFragment";
     private static final String REQUIRED = "Required";
     private FirebaseAuth mAuth;
-  //  private DatabaseReference mDatabase;
     private FirebaseFirestore firestore;
+    private Calendar cldr1;
+    private Calendar cldr2;
+    private SongAdapter mSongAdapter;
 
+    private ArrayList<Song> songs;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -62,9 +70,9 @@ public class NewEventFragment extends Fragment {
 
         binding = FragmentNewEventBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
-        final TextView textViewApplicationDeadline = binding.textApplicationDeadlineNewEvent;
-        final TextView textViewStartDate = binding.textStartDateNewEvent;
+//        can transfer the text to the viewmodel
+//        final TextView textViewApplicationDeadline = binding.textApplicationDeadlineNewEvent;
+//        final TextView textViewStartDate = binding.textStartDateNewEvent
         final TextView textViewLocation = binding.textLocationNewEvent;
 
         final TextView textViewName = binding.textNameNewEvent;
@@ -79,6 +87,7 @@ public class NewEventFragment extends Fragment {
         newEventViewModel.getOrganizersText().observe(getViewLifecycleOwner(), textViewOrganizers::setText);
         newEventViewModel.getParticipantLimitText().observe(getViewLifecycleOwner(), textViewPaxLimit::setText);
         newEventViewModel.getDescriptionText().observe(getViewLifecycleOwner(), textViewDescription::setText);
+        newEventViewModel.getLocationText().observe(getViewLifecycleOwner(), textViewLocation::setText);
 
         newEventViewModel.getCreateText().observe(getViewLifecycleOwner(), btnCreateNewEvent::setText);
         newEventViewModel.getCancelText().observe(getViewLifecycleOwner(), btnCancelNewEvent::setText);
@@ -88,21 +97,47 @@ public class NewEventFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-      //  mDatabase = FirebaseDatabase.getInstance().getReference();
         firestore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        cldr1 = Calendar.getInstance();
+        cldr2 = Calendar.getInstance();
+        songs = new ArrayList<Song>();
 
         binding.btnCreateNewEvent.setOnClickListener(v -> submitPost());
         binding.btnCancelNewEvent.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
-        binding.textApplicationDeadlineNewEvent.setOnClickListener(v -> getDate(v));
-        binding.textStartDateNewEvent.setOnClickListener(v -> getDate(v));
+        binding.textApplicationDeadlineNewEvent.setOnClickListener(v -> getDate(v, cldr1));
+        binding.textStartDateNewEvent.setOnClickListener(v -> getDate(v,cldr2));
 
+        Query query = firestore.collection(Song.FIELD_CLASSNAME)
+                .orderBy(Song.FIELD_NAME, Query.Direction.DESCENDING)
+                .limit(50);
+
+        mSongAdapter = new SongAdapter(query, this) {
+            @Override
+            protected void onDataChanged() {
+                if (getItemCount() == 0) {
+                    binding.newEventRecyclerView.setVisibility(View.GONE);
+                //    binding.textEvents.setVisibility(View.VISIBLE);
+                } else {
+                    binding.newEventRecyclerView.setVisibility(View.VISIBLE);
+                //    binding.textEvents.setVisibility(View.GONE);
+                }
+            }
+            @Override
+            protected void onError(FirebaseFirestoreException e) {
+                // Show a snackbar on errors
+                Log.e("TAG", "onError: ", e);
+                Snackbar.make(binding.getRoot(),
+                        "Error: check logs for info.", Snackbar.LENGTH_LONG).show();
+            }
+        };
+        binding.newEventRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.newEventRecyclerView.setAdapter(mSongAdapter);
     }
 
-    private void getDate(View viewe){
+    private void getDate(View viewer, Calendar cldr){
 
-        final Calendar cldr = Calendar.getInstance();
         int day = cldr.get(Calendar.DAY_OF_MONTH);
         int month = cldr.get(Calendar.MONTH);
         int year = cldr.get(Calendar.YEAR);
@@ -110,54 +145,40 @@ public class NewEventFragment extends Fragment {
         int minute = cldr.get(Calendar.MINUTE);
 
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(NewEventFragment.this.getContext(),
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int day) {
-                        Calendar mCalendar = Calendar.getInstance();
-                        mCalendar.set(Calendar.YEAR, year);
-                        mCalendar.set(Calendar.MONTH, month);
-                        mCalendar.set(Calendar.DAY_OF_MONTH, day);
-                        String selectedDate = DateFormat.getDateInstance(DateFormat.SHORT).format(mCalendar.getTime());
-                        //lectureDate.setText(selectedDate);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(NewEventFragment.this.requireContext(),
+                (view, year1, month1, day1) -> {
+                    Calendar mCalendar = Calendar.getInstance();
+                    mCalendar.set(Calendar.YEAR, year1);
+                    mCalendar.set(Calendar.MONTH, month1);
+                    mCalendar.set(Calendar.DAY_OF_MONTH, day1);
 
-
-                        // on below line we are initializing our Time Picker Dialog
-                        TimePickerDialog timePickerDialog = new TimePickerDialog(NewEventFragment.this.getContext(),
-                                new TimePickerDialog.OnTimeSetListener() {
-                                    @Override
-                                    public void onTimeSet(TimePicker view, int hour, int minute) {
-                                        Calendar mCalendar = Calendar.getInstance();
-                                        mCalendar.set(Calendar.HOUR, hour);
-                                        mCalendar.set(Calendar.MINUTE, minute);
-
-                                        Log.i(TAG, "getDate: Year"+ year+ " Month: " + month+ " Day " + day + " Hour: " + hour + " Minute: " + minute);
-                                        cldr.set(year, month, day, hour, minute);
-                                        int id = viewe.getId();
-                                        Button btn = viewe.findViewById(id);
-                                        btn.setText(cldr.get(Calendar.YEAR)+ "/" +cldr.get(Calendar.MONTH) + "/" +cldr.get(Calendar.DAY_OF_MONTH)+ " " + cldr.get(Calendar.HOUR) + ":" +cldr.get(Calendar.MINUTE));
-                                    }
-                                }, hour, minute, false);
-                        // at last we are calling show to
-                        // display our time picker dialog.
-                        timePickerDialog.show();
-
-                    }
+                    // on below line we are initializing our Time Picker Dialog after selecting the date from the date picker
+                    TimePickerDialog timePickerDialog = new TimePickerDialog(NewEventFragment.this.getContext(),
+                            (view1, hour1, minute1) -> {
+                                Calendar mCalendar1 = Calendar.getInstance();
+                                mCalendar1.set(Calendar.HOUR, hour1);
+                                mCalendar1.set(Calendar.MINUTE, minute1);
+                                cldr.set(year1, month1, day1, hour1, minute1);
+                                int id = viewer.getId();
+                                Button btn = viewer.findViewById(id);
+                                btn.setText(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(cldr.getTime()));
+                            }, hour, minute, false);
+                    timePickerDialog.show();
                 },year, month, day );
 
         datePickerDialog.show();
-    };
+    }
     private void submitPost() {
         final String name = binding.editNameNewEvent.getText().toString();
         final String paxLimit = binding.editParticipantLimitNewEvent.getText().toString();
         final String organizers = binding.editOrganizersNewEvent.getText().toString();
         final String description = binding.editDescriptionNewEvent.getText().toString();
+        final String location = binding.editLocationNewEvent.getText().toString();
         final String announcer = mAuth.getUid();
-        final Timestamp startDate = Timestamp.now();
-        final Timestamp applicationDeadline = Timestamp.now();
+        final Timestamp startDate = new Timestamp(cldr1.getTime());
+        final Timestamp applicationDeadline = new Timestamp(cldr2.getTime());
         final Integer participantLimit = 10;
-        final GeoPoint location = new GeoPoint(0,0);
-        final ArrayList<DocumentReference> songs = new ArrayList<>();
+        //final ArrayList<DocumentReference> songs1 = songs;
 
         // Title is required
         if (TextUtils.isEmpty(name)) {
@@ -179,39 +200,15 @@ public class NewEventFragment extends Fragment {
             binding.editOrganizersNewEvent.setError(REQUIRED);
             return;
         }
+        // location is required
+        if (TextUtils.isEmpty(location)) {
+            binding.editLocationNewEvent.setError(REQUIRED);
+            return;
+        }
 
         // Disable button so there are no multi-posts
         setEditingEnabled(false);
         Toast.makeText(getContext(), "Posting...", Toast.LENGTH_SHORT).show();
-
-//        mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
-//                new ValueEventListener() {
-//                    @Override
-//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                        // Get user value
-//                        User user = dataSnapshot.getValue(User.class);
-//
-//                        if (user == null) {
-//                            // User is null, error out
-//                            Toast.makeText(getContext(),
-//                                    "Error: could not fetch user.",
-//                                    Toast.LENGTH_SHORT).show();
-//                        } else {
-//                            // Write new post
-//                            writeNewPost(userId, name, startDate, applicationDeadline, participantLimit, location,  organizers, description, songs);
-//                        }
-//
-//                        setEditingEnabled(true);
-//                        NavHostFragment.findNavController(NewEventFragment.this).popBackStack();
-//                    }
-//                    @Override
-//                    public void onCancelled(@NonNull DatabaseError databaseError) {
-//                        Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-//                        setEditingEnabled(true);
-//                    }
-//                });
-
-
         writeNewPost(announcer, name, startDate, applicationDeadline, participantLimit, location,  organizers, description, songs);
         NavHostFragment.findNavController(NewEventFragment.this).popBackStack();
         setEditingEnabled(true);
@@ -231,37 +228,58 @@ public class NewEventFragment extends Fragment {
                               Timestamp startDate,
                               Timestamp applicationDeadline,
                               Integer participantLimit,
-                              GeoPoint location,
+                              String location,
                               String organizers,
                               String description,
-                              ArrayList<DocumentReference> songs) {
+                              ArrayList<Song> songs) {
 
-        // Create new post at /user-posts/$userid/$postid and at
-        // /posts/$postid simultaneously
-        // String key = mDatabase.child("events").push().getKey();
-        // Log.d(TAG, "writeNewPost: key = " + key);
-
-        Event event = new Event(announcer, name, startDate, applicationDeadline, participantLimit, location,  organizers, description, songs);
+        Log.d(TAG, "writeNewPost() returned: " + songs.toString());
+        Event event = new Event(announcer, name, startDate, applicationDeadline, participantLimit, location,  organizers, description);
         Map<String, Object> eventValues = event.toMap();
+        firestore.collection(Event.FIELD_CLASSNAME).add(eventValues)
+                .addOnSuccessListener(documentReference -> {
+                    Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
 
-        // Map<String, Object> childUpdates = new HashMap<>();
-        // childUpdates.put("/events/" + key, eventValues);
-        // childUpdates.put("/event-events/" + id + "/" + key, eventValues);
-        // mDatabase.updateChildren(childUpdates);
+                    songs.forEach(new Consumer<Song>() {
+                        @Override
+                        public void accept(Song song) {
+                            firestore.collection(Event.FIELD_CLASSNAME).document(documentReference.getId())
+                            .collection(Song.FIELD_CLASSNAME).add(song);
+                        }
+                    });
+                })
 
-
-        firestore.collection("events").add(eventValues)
-                .addOnSuccessListener(documentReference ->
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId()))
                 .addOnFailureListener(e ->
                         Log.w(TAG, "Error adding document", e));
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        mSongAdapter.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mSongAdapter.stopListening();
+    }
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
-
         binding = null;
+    }
+
+    @Override
+    public void onSongSelected(DocumentSnapshot song) {
+
+        songs.add(song.toObject(Song.class));
+        Log.d(TAG, "onSongSelected() returned: " + songs.toString());
+
+
+//        Bundle s = new Bundle(1);
+//        s.putString("id", song.getId());
+//        NavHostFragment.findNavController(this).navigate(R.id.nav_song_details, s);
     }
 
 }

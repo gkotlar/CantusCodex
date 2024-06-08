@@ -1,14 +1,11 @@
 package com.example.cantuscodex.data.events.model;
 
+import com.example.cantuscodex.data.songs.model.Song;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentId;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Exclude;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,8 +25,8 @@ public class Event {
     private String Announcer, Name, Organizers, Description;
     private Timestamp StartDate, ApplicationDeadline;
     private Integer ParticipantLimit;
-    private GeoPoint Location;
-    private ArrayList<DocumentReference> Songs;
+    private String Location;
+   // private ArrayList<Song> Songs;
 
     public Event() {
 
@@ -40,10 +37,10 @@ public class Event {
                  Timestamp startDate,
                  Timestamp applicationDeadline,
                  Integer participantLimit,
-                 GeoPoint location,
+                 String location,
                  String organizers,
-                 String description,
-                 ArrayList<DocumentReference> songs) {
+                 String description
+                 /*ArrayList<Song> songs*/) {
 
         Announcer = announcer;
         Name = name;
@@ -53,7 +50,7 @@ public class Event {
         Location = location;
         Organizers = organizers;
         Description = description;
-        Songs = songs;
+     //   Songs = songs;
     }
     public String getAnnouncer() {
         return Announcer;
@@ -95,11 +92,11 @@ public class Event {
         ParticipantLimit = participantLimit;
     }
 
-    public GeoPoint getLocation() {
+    public String getLocation() {
         return Location;
     }
 
-    public void setLocation(GeoPoint location) {
+    public void setLocation(String location) {
         Location = location;
     }
 
@@ -119,13 +116,13 @@ public class Event {
         Description = description;
     }
 
-    public ArrayList<DocumentReference> getSongs() {
+/*    public ArrayList<Song> getSongs() {
         return Songs;
     }
 
-    public void setSongs(ArrayList<DocumentReference> songs) {
+    public void setSongs(ArrayList<Song> songs) {
         Songs = songs;
-    }
+    }*/
 
     @Exclude
     public Map<String, Object> toMap() {
@@ -138,7 +135,7 @@ public class Event {
         result.put(FIELD_APPLICATION_DEADLINE, getApplicationDeadline());
         result.put(FIELD_START_DATE, getStartDate());
         result.put(FIELD_PARTICIPANT_LIMIT, getParticipantLimit());
-        result.put(FIELD_SONGS, getSongs());
+        //result.put(FIELD_SONGS, getSongs());
 
         return result;
     }

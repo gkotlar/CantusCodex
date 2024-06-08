@@ -1,5 +1,10 @@
 package com.example.cantuscodex.ui.details;
 
+import static android.content.Context.JOB_SCHEDULER_SERVICE;
+import static android.content.Context.MODE_PRIVATE;
+
+import android.app.job.JobScheduler;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,26 +22,29 @@ import com.example.cantuscodex.R;
 import com.example.cantuscodex.adapter.SongAdapter;
 import com.example.cantuscodex.data.events.model.Event;
 import com.example.cantuscodex.data.songs.model.Song;
+import com.example.cantuscodex.data.users.model.User;
 import com.example.cantuscodex.databinding.FragmentEventDetailsBinding;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
-//  implements EventListener<DocumentSnapshot>
+import java.text.DateFormat;
+
 public class EventDetailsFragment extends Fragment implements
         SongAdapter.OnSongSelectedListener{
 
     private static final String TAG = "EventDetails";
-
     private FragmentEventDetailsBinding mBinding;
     private DocumentReference mEventRef;
     private FirebaseFirestore mFirestore;
     private SongAdapter mSongAdapter;
-
+    private SharedPreferences mPreferences;
+    private final String sharedPrefsFile = "com.example.cantuscodex";
+    private boolean mIsAdmin;
+    private static JobScheduler mScheduler;
 
     @Nullable
     @Override
@@ -53,55 +61,13 @@ public class EventDetailsFragment extends Fragment implements
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final Bundle bdl = getArguments();
-
-        String eventId = "";
-        try {
-            eventId = bdl.getString("id");
-            Log.i(TAG, "onViewCreated: "+ eventId);
-        }catch(final Exception e) {
-            Log.e(TAG, "onViewCreated: ", e);
-            // Do nothing
-        }
         // Initialize Firestore
         mFirestore = FirebaseFirestore.getInstance();
-        // Get reference to the event
-        mEventRef = mFirestore.collection(Event.FIELD_CLASSNAME).document(eventId);
+        mPreferences = getActivity().getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
+        mIsAdmin = mPreferences.getBoolean(User.FIELD_IS_ADMIN, false);
+        mScheduler = (JobScheduler) view.getContext().getSystemService(JOB_SCHEDULER_SERVICE);
 
-        CollectionReference ref = mFirestore.collection(Song.FIELD_CLASSNAME);
-        // Get ratings
-        Query songsQuery = ref
-                .orderBy(Song.FIELD_NAME, Query.Direction.DESCENDING)
-                .limit(10);
-
-        mEventRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Event event = documentSnapshot.toObject(Event.class);
-                onEventLoaded(event);
-            }
-        });
-
-        mSongAdapter = new SongAdapter(songsQuery, this) {
-            @Override
-            protected void onDataChanged() {
-                if (getItemCount() == 0) {
-                    mBinding.songsEventsRecyclerView.setVisibility(View.GONE);
-                    //mBinding.viewEmptyRatings.setVisibility(View.VISIBLE);
-                } else {
-                    mBinding.songsEventsRecyclerView.setVisibility(View.VISIBLE);
-                   // mBinding.viewEmptyRatings.setVisibility(View.GONE);
-                }
-            }
-        };
-        mBinding.songsEventsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        mBinding.songsEventsRecyclerView.setAdapter(mSongAdapter);
-
-        mBinding.fabDeleteEvent.setVisibility(View.VISIBLE);
-        mBinding.fabDeleteEvent.setOnClickListener(v -> {
-            Navigation.findNavController(v).popBackStack();
-            mEventRef.delete();
-        });
+        doMagic(getArguments());
     }
 
     @Override
@@ -115,37 +81,85 @@ public class EventDetailsFragment extends Fragment implements
         super.onStop();
         mSongAdapter.stopListening();
     }
-    /**
-     * Listener for the Restaurant document ({@link #mEventRef}).
-     */
-//    @Override
-//    public void onEvent(DocumentSnapshot snapshot, FirebaseFirestoreException e) {
-//        if (e != null) {
-//            Log.w(TAG, "restaurant:onEvent", e);
-//            return;
-//        }
-//        onEventLoaded(snapshot.toObject(Event.class));
-//        Log.i(TAG, "onEvent: " +Event.class.toString());
-//    }
     @Override
     public void onSongSelected(DocumentSnapshot song) {
-        // Go to the details page for the selected restaurant
         Bundle s = new Bundle(1);
         s.putString("id", song.getId());
         NavHostFragment.findNavController(this).navigate(R.id.nav_song_details, s);
     }
 
-    private void onEventLoaded(Event event) {
+    private void onEventLoaded(DocumentSnapshot documentSnapshot) {
+        Event event = documentSnapshot.toObject(Event.class);
+
         mBinding.textNameEvent.setText(event.getName());
         mBinding.textDescriptionEvent.setText(event.getDescription());
-        mBinding.textLocationEvent.setText(event.getLocation().toString());
+        mBinding.textLocationEvent.setText(event.getLocation());
         mBinding.textOrganizersEvent.setText(event.getOrganizers());
-
         mBinding.textParticipantLimitEvent.setText(event.getParticipantLimit().toString());
+        mBinding.textApplicationDeadlineEvent.setText(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(event.getApplicationDeadline().toDate()));
+        mBinding.textStartDateEvent.setText(DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.SHORT ).format(event.getStartDate().toDate()));
 
-        mBinding.textApplicationDeadlineEvent.setText(event.getApplicationDeadline().toString());
-        mBinding.textStartDateEvent.setText(event.getStartDate().toString());
+        CollectionReference ref = mFirestore.collection(Event.FIELD_CLASSNAME).document(documentSnapshot.getId()).collection(Song.FIELD_CLASSNAME);
 
+        Query songsQuery = ref
+                .orderBy(Song.FIELD_NAME, Query.Direction.DESCENDING)
+                .limit(10);
+
+        mSongAdapter = new SongAdapter(songsQuery, this) {
+            @Override
+            protected void onDataChanged() {
+                if (getItemCount() == 0) {
+                    mBinding.songsEventsRecyclerView.setVisibility(View.GONE);
+                    //mBinding.viewEmptyRatings.setVisibility(View.VISIBLE);
+                } else {
+                    mBinding.songsEventsRecyclerView.setVisibility(View.VISIBLE);
+                    // mBinding.viewEmptyRatings.setVisibility(View.GONE);
+                }
+            }
+        };
+        mBinding.songsEventsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        mBinding.songsEventsRecyclerView.setAdapter(mSongAdapter);
+    }
+
+    public void doMagic(Bundle bundle){
+        try {
+            String eventId = bundle.getString("id");
+            boolean bookmarked = bundle.getBoolean("bookmarked");
+
+            // Get reference to the event
+            if (bookmarked){
+                mEventRef = mFirestore.collection("user_events").document(eventId);
+            }else {
+                mEventRef = mFirestore.collection(Event.FIELD_CLASSNAME).document(eventId);
+            }
+
+            mEventRef.get().addOnSuccessListener(documentSnapshot -> {
+                Event event = documentSnapshot.toObject(Event.class);
+                onEventLoaded(documentSnapshot);
+
+                if (mIsAdmin){
+                    mBinding.fabDeleteEvent.setVisibility(View.VISIBLE);
+                    mBinding.fabDeleteEvent.setOnClickListener(v -> {
+                        cancelJob(event);
+                        Navigation.findNavController(v).popBackStack();
+                        mEventRef.delete();
+                    });
+                }
+
+            });
+
+        }catch(final Exception e) {
+            mBinding.textNameEvent.setText("Err");
+            Log.e(TAG, "onViewCreated: ", e);
+            // Do nothing
+        }
+
+    }
+
+    private void cancelJob(Event event) {
+        if (mScheduler != null){
+            mScheduler.cancel(event.getStartDate().getNanoseconds());
+        }
     }
 
 }

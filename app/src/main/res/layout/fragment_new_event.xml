@@ -19,7 +19,7 @@
             android:layout_marginEnd="8dp"
             android:textAlignment="center"
             android:textSize="20sp"
-            android:hint="application deadline"
+            android:hint="@string/application_deadline"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toTopOf="@id/text_startDate_newEvent" />
@@ -27,7 +27,7 @@
         <Button
             android:id="@+id/text_startDate_newEvent"
             android:layout_width="match_parent"
-            android:hint="startDate"
+            android:hint="@string/start_date"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
@@ -38,10 +38,22 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toTopOf="@id/text_location_newEvent" />
 
-        <Button
+        <TextView
             android:id="@+id/text_location_newEvent"
             android:layout_width="match_parent"
-            android:hint="location"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/edit_location_newEvent" />
+
+        <EditText
+            android:id="@+id/edit_location_newEvent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
@@ -183,6 +195,15 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btn_cancel_newEvent" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/new_event_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="@id/btn_create_newEvent"
+            tools:listitem="@layout/card_songs"
+            />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
