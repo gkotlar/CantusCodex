@@ -66,7 +66,6 @@ public class EventDetailsFragment extends Fragment implements
         String sharedPrefsFile = "com.example.cantuscodex";
         SharedPreferences mPreferences = requireActivity().getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
         mIsAdmin = mPreferences.getBoolean(User.FIELD_IS_ADMIN, false);
-        mScheduler = (JobScheduler) view.getContext().getSystemService(JOB_SCHEDULER_SERVICE);
 
 
         try {
@@ -92,7 +91,12 @@ public class EventDetailsFragment extends Fragment implements
                     mBinding.fabDeleteEvent.setVisibility(View.VISIBLE);
                     mBinding.fabDeleteEvent.setOnClickListener(v -> {
                         Event event = documentSnapshot.toObject(Event.class);
-                        cancelJob(event);
+                        mScheduler = (JobScheduler) getContext().getSystemService(JOB_SCHEDULER_SERVICE);
+
+                        if (mScheduler != null && event!=null){
+                            mScheduler.cancel(event.getStartDate().getNanoseconds());
+                        }
+
                         Navigation.findNavController(v).popBackStack();
                         mEventRef.delete();
                     });
@@ -138,12 +142,6 @@ public class EventDetailsFragment extends Fragment implements
             mBinding.textParticipantLimitEvent.setText(String.format(Locale.getDefault(),"%d", event.getParticipantLimit()));
             mBinding.textApplicationDeadlineEvent.setText(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(event.getApplicationDeadline().toDate()));
             mBinding.textStartDateEvent.setText(DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.SHORT ).format(event.getStartDate().toDate()));
-        }
-    }
-
-    private void cancelJob(Event event) {
-        if (mScheduler != null){
-            mScheduler.cancel(event.getStartDate().getNanoseconds());
         }
     }
 

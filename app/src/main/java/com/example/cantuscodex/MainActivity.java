@@ -1,6 +1,7 @@
 package com.example.cantuscodex;
 
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,6 +13,8 @@ import com.example.cantuscodex.data.users.model.User;
 import com.google.android.material.navigation.NavigationView;
 
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -56,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-
         NavigationUI.setupWithNavController(navigationView, navController);
 
         MenuItem btnLogout = binding.navView.getMenu().findItem(R.id.nav_login);
@@ -75,9 +77,6 @@ public class MainActivity extends AppCompatActivity {
         View headerRoot = binding.navView.getHeaderView(0);
         TextView UserMail = headerRoot.findViewById(R.id.header_mail);
         TextView UserTitle = headerRoot.findViewById(R.id.header_titles);
-
-
-
         UserMail.setText(mPreferences.getString(User.FIELD_EMAIL, "Error"));
 
         if (mPreferences.getBoolean(User.FIELD_IS_ADMIN, false)){
@@ -98,6 +97,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+
+        int permissionState = ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS);
+        // If the permission is not granted, request it.
+        if (permissionState == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1);
+        }
     }
 
     @Override
