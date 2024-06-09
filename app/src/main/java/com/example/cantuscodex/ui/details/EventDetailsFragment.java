@@ -25,16 +25,13 @@ import com.example.cantuscodex.data.songs.model.Song;
 import com.example.cantuscodex.data.users.model.User;
 import com.example.cantuscodex.databinding.FragmentEventDetailsBinding;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DateFormat;
 import java.util.Locale;
-import java.util.function.Consumer;
 
 public class EventDetailsFragment extends Fragment implements
         SongAdapter.OnSongSelectedListener{
