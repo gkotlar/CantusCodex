@@ -1,7 +1,6 @@
 package com.example.cantuscodex.ui.newEvent;
 
-import com.example.cantuscodex.R;
-import com.example.cantuscodex.adapter.EventAdapter;
+
 import com.example.cantuscodex.adapter.SongAdapter;
 import com.example.cantuscodex.data.events.model.Event;
 import com.example.cantuscodex.data.songs.model.Song;
@@ -37,7 +36,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -47,7 +45,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class NewEventFragment extends Fragment implements SongAdapter.OnSongSelectedListener {
 
@@ -101,7 +98,7 @@ public class NewEventFragment extends Fragment implements SongAdapter.OnSongSele
         mAuth = FirebaseAuth.getInstance();
         cldr1 = Calendar.getInstance();
         cldr2 = Calendar.getInstance();
-        songs = new ArrayList<Song>();
+        songs = new ArrayList<>();
 
         binding.btnCreateNewEvent.setOnClickListener(v -> submitPost());
         binding.btnCancelNewEvent.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
@@ -137,14 +134,11 @@ public class NewEventFragment extends Fragment implements SongAdapter.OnSongSele
     }
 
     private void getDate(View viewer, Calendar cldr){
-
         int day = cldr.get(Calendar.DAY_OF_MONTH);
         int month = cldr.get(Calendar.MONTH);
         int year = cldr.get(Calendar.YEAR);
         int hour = cldr.get(Calendar.HOUR_OF_DAY);
         int minute = cldr.get(Calendar.MINUTE);
-
-
         DatePickerDialog datePickerDialog = new DatePickerDialog(NewEventFragment.this.requireContext(),
                 (view, year1, month1, day1) -> {
                     Calendar mCalendar = Calendar.getInstance();
@@ -165,7 +159,6 @@ public class NewEventFragment extends Fragment implements SongAdapter.OnSongSele
                             }, hour, minute, false);
                     timePickerDialog.show();
                 },year, month, day );
-
         datePickerDialog.show();
     }
     private void submitPost() {
@@ -212,7 +205,6 @@ public class NewEventFragment extends Fragment implements SongAdapter.OnSongSele
         writeNewPost(announcer, name, startDate, applicationDeadline, participantLimit, location,  organizers, description, songs);
         NavHostFragment.findNavController(NewEventFragment.this).popBackStack();
         setEditingEnabled(true);
-
     }
 
     private void setEditingEnabled(boolean enabled) {
@@ -239,16 +231,10 @@ public class NewEventFragment extends Fragment implements SongAdapter.OnSongSele
         firestore.collection(Event.FIELD_CLASSNAME).add(eventValues)
                 .addOnSuccessListener(documentReference -> {
                     Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-
-                    songs.forEach(new Consumer<Song>() {
-                        @Override
-                        public void accept(Song song) {
-                            firestore.collection(Event.FIELD_CLASSNAME).document(documentReference.getId())
-                            .collection(Song.FIELD_CLASSNAME).add(song);
-                        }
-                    });
+                    songs.forEach(song -> firestore.collection(Event.FIELD_CLASSNAME)
+                            .document(documentReference.getId())
+                    .collection(Song.FIELD_CLASSNAME).add(song));
                 })
-
                 .addOnFailureListener(e ->
                         Log.w(TAG, "Error adding document", e));
     }
@@ -272,14 +258,7 @@ public class NewEventFragment extends Fragment implements SongAdapter.OnSongSele
 
     @Override
     public void onSongSelected(DocumentSnapshot song) {
-
         songs.add(song.toObject(Song.class));
-        Log.d(TAG, "onSongSelected() returned: " + songs.toString());
-
-
-//        Bundle s = new Bundle(1);
-//        s.putString("id", song.getId());
-//        NavHostFragment.findNavController(this).navigate(R.id.nav_song_details, s);
     }
 
 }

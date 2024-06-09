@@ -38,6 +38,8 @@
     <string name="application_deadline">Application deadline</string>
     <string name="start_date">Start Date</string>
     <string name="is_starting_in_one_hour_better_start_preparing_to_leave">Is starting in one hour, better start preparing to leave</string>
+    <string name="error">Error</string>
+    <string name="text_user">User</string>
 
 
 </resources>

@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cantuscodex.R;
@@ -21,18 +22,15 @@ import com.example.cantuscodex.databinding.CardEventsBinding;
 
 
 import com.example.cantuscodex.notifications.NotificationJobService;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DateFormat;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Objects;
 
 /**
  * RecyclerView adapter for a list of {@link Event}.
@@ -50,8 +48,9 @@ public class EventAdapter extends FirestoreAdapter<EventAdapter.ViewHolder> {
         mListener = listener;
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder(CardEventsBinding.inflate(
                 LayoutInflater.from(parent.getContext()), parent, false));
     }
@@ -77,11 +76,12 @@ public class EventAdapter extends FirestoreAdapter<EventAdapter.ViewHolder> {
                          final OnEventSelectedListener listener) {
             Event event = snapshot.toObject(Event.class);
           //  Resources resources = itemView.getResources();
-            binding.tvTitleEvents.setText(event.getName());
-            binding.tvDescriptionEvents.setText(event.getDescription());
-            binding.tvOrganizersEvents.setText(event.getOrganizers());
-            binding.tvStartDateEvents.setText(DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.SHORT ).format(event.getStartDate().toDate()));
-
+            if (event != null) {
+                binding.tvTitleEvents.setText(event.getName());
+                binding.tvDescriptionEvents.setText(event.getDescription());
+                binding.tvOrganizersEvents.setText(event.getOrganizers());
+                binding.tvStartDateEvents.setText(DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.SHORT ).format(event.getStartDate().toDate()));
+            }
             // Click listener
             itemView.setOnClickListener(view -> {
                 if (listener != null) {
@@ -96,20 +96,29 @@ public class EventAdapter extends FirestoreAdapter<EventAdapter.ViewHolder> {
                     binding.ivBookmarkEvents.setImageResource(R.drawable.card_bookmark_filled);
 
                     FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-                    Map<String, Object> result = event.toMap();
-                    result.put("userId", FirebaseAuth.getInstance().getUid());
-                    result.put("id", snapshot.getId());
-                    scheduleJob( event, binding.getRoot().getContext());
+                    Map<String, Object> result = null;
 
-                    firestore.collection("user_events").document(snapshot.getId()).set(result).addOnSuccessListener(unused -> {
-                        Query query = firestore.collection(Event.FIELD_CLASSNAME).document(snapshot.getId()).collection(Song.FIELD_CLASSNAME);
-                        query.get().addOnSuccessListener(queryDocumentSnapshots -> {
-                           List<DocumentSnapshot> li = queryDocumentSnapshots.getDocuments();
-                           li.forEach(documentSnapshot -> firestore.collection(Event.FIELD_CLASSNAME).document(snapshot.getId())
-                                   .collection(Song.FIELD_CLASSNAME).add(documentSnapshot.toObject(Song.class)));
-                        });
+                    if (event != null) {
+                        result = event.toMap();
+                        result.put("userId", FirebaseAuth.getInstance().getUid());
+                        result.put("id", snapshot.getId());
+                    }
+
+                    if (event != null) {
+                        scheduleJob( event, binding.getRoot().getContext());
+                    }
+
+                    if (result != null) {
+                        firestore.collection("user_events").document(snapshot.getId()).set(result);
+                    }
+
+                    firestore.collection(Event.FIELD_CLASSNAME).document(snapshot.getId())
+                            .collection(Song.FIELD_CLASSNAME).get().addOnSuccessListener(queryDocumentSnapshots
+                                    -> queryDocumentSnapshots.getDocuments().forEach(documentSnapshot
+                                        -> firestore.collection("user_events").document(snapshot.getId())
+                                            .collection(Song.FIELD_CLASSNAME).document(documentSnapshot.getId())
+                                                .set(Objects.requireNonNull(documentSnapshot.toObject(Song.class)))));
                     });
-                });
             }
         }
     }

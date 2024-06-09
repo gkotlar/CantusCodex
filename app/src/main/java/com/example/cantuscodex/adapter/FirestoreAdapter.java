@@ -13,14 +13,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
-/**
- * RecyclerView adapter for displaying the results of a Firestore {@link Query}.
- *
- * Note that this class forgoes some efficiency to gain simplicity. For example, the result of
- * {@link DocumentSnapshot#toObject(Class)} is not cached so the same object may be deserialized
- * many times as the user scrolls.
- */
-
 public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
         extends RecyclerView.Adapter<VH>
         implements EventListener<QuerySnapshot> {
@@ -30,7 +22,7 @@ public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
     private Query mQuery;
     private ListenerRegistration mRegistration;
 
-    private ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
+    private final ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
 
     public FirestoreAdapter(Query query) {
         mQuery = query;
@@ -126,7 +118,7 @@ public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
 
     protected void onError(FirebaseFirestoreException e) {
         Log.w(TAG, "onError", e);
-    };
+    }
 
     protected void onDataChanged() {}
 }

@@ -22,13 +22,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.cantuscodex.databinding.ActivityMainBinding;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
     private FirebaseAuth mAuth;
     private SharedPreferences mPreferences;
-    private String sharedPrefsFile = "com.example.cantuscodex";
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        String sharedPrefsFile = "com.example.cantuscodex";
         mPreferences = getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
 
 
@@ -79,23 +81,20 @@ public class MainActivity extends AppCompatActivity {
         UserMail.setText(mPreferences.getString(User.FIELD_EMAIL, "Error"));
 
         if (mPreferences.getBoolean(User.FIELD_IS_ADMIN, false)){
-            UserTitle.setText("Admin");
+            UserTitle.setText(R.string.admin);
         }else {
-            UserTitle.setText("User");
+            UserTitle.setText(R.string.text_user);
         }
 
-        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key == User.FIELD_EMAIL) {
-                    UserMail.setText(mPreferences.getString(User.FIELD_EMAIL, "Error"));
-                }
-                if (key == User.FIELD_IS_ADMIN) {
-                    if (mPreferences.getBoolean(User.FIELD_IS_ADMIN, false)){
-                        UserTitle.setText("Admin");
-                    }else {
-                        UserTitle.setText("User");
-                    }
+        listener = (sharedPreferences, key) -> {
+            if (Objects.equals(key, User.FIELD_EMAIL)) {
+                UserMail.setText(mPreferences.getString(User.FIELD_EMAIL, "Error"));
+            }
+            if (Objects.equals(key, User.FIELD_IS_ADMIN)) {
+                if (mPreferences.getBoolean(User.FIELD_IS_ADMIN, false)){
+                    UserTitle.setText(R.string.admin);
+                }else {
+                    UserTitle.setText(R.string.text_user);
                 }
             }
         };

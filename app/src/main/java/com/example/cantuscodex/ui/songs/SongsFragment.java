@@ -30,12 +30,10 @@ import com.google.firebase.firestore.Query;
 
 public class SongsFragment extends Fragment implements
         SongAdapter.OnSongSelectedListener{
-
     private FragmentSongsBinding binding;
     private SongAdapter mAdapter;
     private Query query;
     private boolean mIsAdmin;
-
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -48,15 +46,9 @@ public class SongsFragment extends Fragment implements
         String sharedPrefsFile = "com.example.cantuscodex";
         SharedPreferences mPreferences = requireActivity().getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
         mIsAdmin = mPreferences.getBoolean(User.FIELD_IS_ADMIN, false);
-
-
-
         final TextView textView = binding.textSongs;
         songsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-
         return root;
-
-
     }
 
     @Override
@@ -102,6 +94,7 @@ public class SongsFragment extends Fragment implements
     public void onSongSelected(DocumentSnapshot song) {
         Bundle s = new Bundle(1);
         s.putString("id", song.getId());
+        s.putString("from", "songs");
         Navigation.findNavController(binding.getRoot()).navigate(R.id.nav_song_details, s);
     }
 
@@ -114,7 +107,6 @@ public class SongsFragment extends Fragment implements
             mAdapter.startListening();
         }
     }
-
     @Override
     public void onStop() {
         super.onStop();
@@ -122,9 +114,7 @@ public class SongsFragment extends Fragment implements
         if (mAdapter != null) {
             mAdapter.stopListening();
         }
-
     }
-
 
     @Override
     public void onDestroyView() {

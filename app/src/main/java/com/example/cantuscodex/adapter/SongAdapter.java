@@ -1,10 +1,10 @@
 package com.example.cantuscodex.adapter;
 
-import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cantuscodex.R;
@@ -23,17 +23,19 @@ public class SongAdapter extends FirestoreAdapter<SongAdapter.ViewHolder> {
     public interface OnSongSelectedListener {
         void onSongSelected(DocumentSnapshot song);
     }
-    private OnSongSelectedListener mListener;
+    private final OnSongSelectedListener mListener;
     public SongAdapter(Query query, OnSongSelectedListener listener) {
         super(query);
         mListener = listener;
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder(CardSongsBinding.inflate(
                 LayoutInflater.from(parent.getContext()), parent, false));
     }
+
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
@@ -57,12 +59,13 @@ public class SongAdapter extends FirestoreAdapter<SongAdapter.ViewHolder> {
                          final OnSongSelectedListener listener) {
 
             Song song = snapshot.toObject(Song.class);
-            Resources resources = itemView.getResources();
 
 
-            binding.tvName.setText(song.getName());
-            binding.tvDescription.setText(song.getDescription());
-            binding.tvOrigin.setText(song.getOrigin());
+            if (song != null) {
+                binding.tvName.setText(song.getName());
+                binding.tvDescription.setText(song.getDescription());
+                binding.tvOrigin.setText(song.getOrigin());
+            }
 
             // Click listener
             itemView.setOnClickListener(view -> {

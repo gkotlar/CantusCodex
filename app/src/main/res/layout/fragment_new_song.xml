@@ -35,9 +35,11 @@
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/text_content_newSong" />
+        app:layout_constraintBottom_toTopOf="@id/text_content_newSong"
+        tools:ignore="Autofill,LabelFor,TextFields" />
 
-    <TextView
+
+        <TextView
         android:id="@+id/text_content_newSong"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -62,9 +64,11 @@
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/text_origin_newSong" />
+        app:layout_constraintBottom_toTopOf="@id/text_origin_newSong"
+        tools:ignore="Autofill,LabelFor,TextFields" />
 
-    <TextView
+
+        <TextView
         android:id="@+id/text_origin_newSong"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -89,9 +93,11 @@
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_origin_newSong" />
+        app:layout_constraintTop_toBottomOf="@id/text_origin_newSong"
+        tools:ignore="Autofill,LabelFor,TextFields" />
 
-    <TextView
+
+        <TextView
         android:id="@+id/text_description_newSong"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -115,9 +121,11 @@
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_description_newSong" />
+        app:layout_constraintTop_toBottomOf="@id/text_description_newSong"
+        tools:ignore="Autofill,LabelFor,TextFields" />
 
-    <Button
+
+        <Button
         android:id="@+id/btn_cancel_newSong"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -142,8 +150,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_cancel_newSong" />
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

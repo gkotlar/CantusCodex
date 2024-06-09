@@ -16,9 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.FragmentNavigator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.cantuscodex.R;
@@ -26,7 +24,6 @@ import com.example.cantuscodex.adapter.EventAdapter;
 import com.example.cantuscodex.data.events.model.Event;
 import com.example.cantuscodex.data.users.model.User;
 import com.example.cantuscodex.databinding.FragmentEventsBinding;
-import com.example.cantuscodex.ui.bookmarked_events.BookmarkedEventsFragment;
 import com.example.cantuscodex.ui.details.EventDetailsFragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.Timestamp;
@@ -55,7 +52,7 @@ public class EventsFragment extends Fragment implements
         eventsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
         String sharedPrefsFile = "com.example.cantuscodex";
-        SharedPreferences mPreferences = getActivity().getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
+        SharedPreferences mPreferences = requireActivity().getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
         mIsAdmin = mPreferences.getBoolean(User.FIELD_IS_ADMIN, false);
 
         return root;

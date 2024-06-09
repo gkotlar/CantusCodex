@@ -1,11 +1,8 @@
 package com.example.cantuscodex.data.events.model;
 
-import com.example.cantuscodex.data.songs.model.Song;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Exclude;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +37,7 @@ public class Event {
                  String location,
                  String organizers,
                  String description
-                 /*ArrayList<Song> songs*/) {
+                 ) {
 
         Announcer = announcer;
         Name = name;
@@ -50,7 +47,6 @@ public class Event {
         Location = location;
         Organizers = organizers;
         Description = description;
-     //   Songs = songs;
     }
     public String getAnnouncer() {
         return Announcer;
@@ -116,14 +112,6 @@ public class Event {
         Description = description;
     }
 
-/*    public ArrayList<Song> getSongs() {
-        return Songs;
-    }
-
-    public void setSongs(ArrayList<Song> songs) {
-        Songs = songs;
-    }*/
-
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
@@ -135,7 +123,6 @@ public class Event {
         result.put(FIELD_APPLICATION_DEADLINE, getApplicationDeadline());
         result.put(FIELD_START_DATE, getStartDate());
         result.put(FIELD_PARTICIPANT_LIMIT, getParticipantLimit());
-        //result.put(FIELD_SONGS, getSongs());
 
         return result;
     }

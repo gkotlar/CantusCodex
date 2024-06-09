@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.cantuscodex.R;
@@ -24,26 +25,28 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Map;
+import java.util.Objects;
 
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
-    private static final String TAG = "LoginFragment";
+   // private static final String TAG = "LoginFragment";
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
     private FragmentLoginBinding binding;
 
     private SharedPreferences mPreferences;
-    private final String sharedPrefsFile = "com.example.cantuscodex";
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-       // LoginViewModel loginViewModel =
-        //        new ViewModelProvider(this).get(LoginViewModel.class);
+        LoginViewModel loginViewModel =
+                new ViewModelProvider(this).get(LoginViewModel.class);
+
         binding = FragmentLoginBinding.inflate(inflater, container, false);
+        String sharedPrefsFile = "com.example.cantuscodex";
         mPreferences = requireActivity().getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
 
         return binding.getRoot();
@@ -81,7 +84,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(requireActivity(), task -> {
                     if (task.isSuccessful()) {
-                        onAuthSuccess(task.getResult().getUser().getUid());
+                        onAuthSuccess(Objects.requireNonNull(task.getResult().getUser()).getUid());
                     } else {
                         Toast.makeText(getContext(), "Sign In Failed",
                                 Toast.LENGTH_SHORT).show();
@@ -101,7 +104,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(requireActivity(), task -> {
                     if (task.isSuccessful()) {
-                        String userId = task.getResult().getUser().getUid();
+                        String userId = Objects.requireNonNull(task.getResult().getUser()).getUid();
                         String username = usernameFromEmail(email);
 
                         onAuthSuccess(userId);
@@ -120,10 +123,12 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 .addOnSuccessListener(documentSnapshot -> {
                     User user = documentSnapshot.toObject(User.class);
                     SharedPreferences.Editor preferencesEditor = mPreferences.edit();
-                    preferencesEditor.putBoolean(User.FIELD_IS_ADMIN, user.isAdmin());
-                    preferencesEditor.putString(User.FIELD_USERNAME, user.getUsername());
-                    preferencesEditor.putString(User.FIELD_EMAIL, user.getEmail());
-                    preferencesEditor.apply();
+                    if (user != null) {
+                        preferencesEditor.putBoolean(User.FIELD_IS_ADMIN, user.isAdmin());
+                        preferencesEditor.putString(User.FIELD_USERNAME, user.getUsername());
+                        preferencesEditor.putString(User.FIELD_EMAIL, user.getEmail());
+                        preferencesEditor.apply();
+                    }
                 });
 
         NavHostFragment.findNavController(this).navigate(R.id.nav_home);

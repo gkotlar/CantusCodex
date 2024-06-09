@@ -14,6 +14,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+import com.example.cantuscodex.R;
+import com.example.cantuscodex.data.events.model.Event;
 import com.example.cantuscodex.data.songs.model.Song;
 import com.example.cantuscodex.data.users.model.User;
 import com.example.cantuscodex.databinding.FragmentSongDetailsBinding;
@@ -21,15 +23,14 @@ import com.example.cantuscodex.databinding.FragmentSongDetailsBinding;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Objects;
+
 
 public class SongDetailsFragment extends Fragment {
 
     private static final String TAG = "SongDetails";
     private FragmentSongDetailsBinding mBinding;
     private DocumentReference mSongRef;
-    private FirebaseFirestore mFirestore;
-    private SharedPreferences mPreferences;
-    private final String sharedPrefsFile = "com.example.cantuscodex";
 
     @Nullable
     @Override
@@ -45,29 +46,52 @@ public class SongDetailsFragment extends Fragment {
     public void onViewCreated(@NonNull View view,
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mFirestore = FirebaseFirestore.getInstance();
 
-        mPreferences = getActivity().getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
+        FirebaseFirestore mFirestore = FirebaseFirestore.getInstance();
+        String sharedPrefsFile = "com.example.cantuscodex";
+        SharedPreferences mPreferences = requireActivity().getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
         boolean mIsAdmin = mPreferences.getBoolean(User.FIELD_IS_ADMIN, false);
 
         final Bundle bdl = getArguments();
 
-        String songId;
         try {
-            songId = bdl.getString("id");
+            assert bdl != null;
+            String songId = bdl.getString("id");
+            String from = bdl.getString("from");
+            boolean bookmarked = bdl.getBoolean("bookmarked", false);
+
+            if(Objects.equals(from, "songs")){
+                if (songId != null) {
+                    mSongRef = mFirestore.collection(Song.FIELD_CLASSNAME).document(songId);
+                }
+            }else if(Objects.equals(from, "details")){
+                String eventId = bdl.getString("event");
+
+                if (bookmarked){
+                    if (eventId != null && songId != null) {
+                        mSongRef = mFirestore.collection("user_events").document(eventId)
+                                .collection(Song.FIELD_CLASSNAME).document(songId);
+                    }
+                }else {
+                    if (eventId != null && songId != null) {
+                        mSongRef = mFirestore.collection(Event.FIELD_CLASSNAME).document(eventId)
+                                .collection(Song.FIELD_CLASSNAME).document(songId);
+                    }
+                }
+            }
             Log.i(TAG, "onViewCreated: "+ songId);
-            mSongRef = mFirestore.collection(Song.FIELD_CLASSNAME).document(songId);
             mSongRef.get().addOnSuccessListener(documentSnapshot -> {
                 Song song = documentSnapshot.toObject(Song.class);
-                onSongLoaded(song);
+                if (song != null) {
+                    onSongLoaded(song);
+                }
             });
+
         }catch(final Exception e) {
-            mBinding.textNameNewSong.setText("Err");
+            mBinding.textNameNewSong.setText(R.string.error);
             Log.e(TAG, "onViewCreated: ", e);
             // Do nothing
         }
-        // Initialize Firestore
-        // Get reference to the restaurant
 
         if(mIsAdmin){
             mBinding.fabDeleteSong.setVisibility(View.VISIBLE);
@@ -76,7 +100,6 @@ public class SongDetailsFragment extends Fragment {
                 mSongRef.delete();
             });
         }
-
     }
 
     private void onSongLoaded(Song song) {
@@ -84,5 +107,4 @@ public class SongDetailsFragment extends Fragment {
         mBinding.textNameNewSong.setText(song.getName());
         mBinding.textOriginNewSong.setText(song.getOrigin());
     }
-
 }
