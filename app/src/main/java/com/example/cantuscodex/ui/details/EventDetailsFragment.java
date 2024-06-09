@@ -91,7 +91,7 @@ public class EventDetailsFragment extends Fragment implements
                     mBinding.fabDeleteEvent.setVisibility(View.VISIBLE);
                     mBinding.fabDeleteEvent.setOnClickListener(v -> {
                         Event event = documentSnapshot.toObject(Event.class);
-                        mScheduler = (JobScheduler) getContext().getSystemService(JOB_SCHEDULER_SERVICE);
+                        mScheduler = (JobScheduler) requireContext().getSystemService(JOB_SCHEDULER_SERVICE);
 
                         if (mScheduler != null && event!=null){
                             mScheduler.cancel(event.getStartDate().getNanoseconds());
