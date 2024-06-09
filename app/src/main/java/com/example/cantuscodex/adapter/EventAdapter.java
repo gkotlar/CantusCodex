@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.Context;
 
 import android.os.PersistableBundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -128,11 +129,11 @@ public class EventAdapter extends FirestoreAdapter<EventAdapter.ViewHolder> {
         bundle.putString(Event.FIELD_NAME, event.getName());
         bundle.putInt(Event.FIELD_START_DATE, event.getStartDate().getNanoseconds());
 
+        int time = Math.toIntExact(event.getStartDate().getSeconds() - Timestamp.now().getSeconds());
 
-        int time = event.getStartDate().getNanoseconds() - Timestamp.now().getNanoseconds();
         ComponentName serviceName = new ComponentName(context.getPackageName(), NotificationJobService.class.getName());
         JobInfo.Builder builder = new JobInfo.Builder(event.getStartDate().getNanoseconds(), serviceName)
-                .setMinimumLatency(time/1000 - 1000*60*60 /*1 hour before the event start*/)
+                .setMinimumLatency((time - 60*60) /*1 hour before the event start*/)
                 .setExtras(bundle)
                 .setPersisted(true);
         JobInfo myJobInfo = builder.build();

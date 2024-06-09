@@ -75,8 +75,6 @@ public class NotificationJobService extends JobService {
 
     @Override
     public boolean onStopJob(JobParameters jobParameters) {
-        NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(jobParameters.getJobId());
         Log.i("TAG", "onStopJob: stopped");
         return true;
     }
