@@ -24,6 +24,7 @@ import com.example.cantuscodex.adapter.EventAdapter;
 import com.example.cantuscodex.data.events.model.Event;
 import com.example.cantuscodex.data.users.model.User;
 import com.example.cantuscodex.databinding.FragmentEventsBinding;
+import com.example.cantuscodex.databinding.FragmentEventsCombinedBinding;
 import com.example.cantuscodex.ui.details.EventDetailsFragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.Timestamp;

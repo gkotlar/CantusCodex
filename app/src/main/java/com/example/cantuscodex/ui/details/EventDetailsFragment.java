@@ -115,7 +115,7 @@ public class EventDetailsFragment extends Fragment implements
                     .limit(10);
 
         } catch(final Exception e) {
-        mBinding.textNameEvent.setText(R.string.error);
+        mBinding.textNameEvent.setText(R.string.please_select_a_event);
         Log.e(TAG, "onViewCreated: ", e);
         // Do nothing
     }
