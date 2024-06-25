@@ -28,11 +28,11 @@
                 android:id="@+id/iv_header_image_events"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:contentDescription="@string/event_image"
-                android:src="@drawable/ic_menu_events"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                />
+
 
             <TextView
                 android:id="@+id/tv_title_events"

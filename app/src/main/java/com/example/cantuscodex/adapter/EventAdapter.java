@@ -7,6 +7,8 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 
+import android.content.res.Configuration;
+import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cantuscodex.R;
@@ -22,7 +26,9 @@ import com.example.cantuscodex.data.songs.model.Song;
 import com.example.cantuscodex.databinding.CardEventsBinding;
 
 
+import com.example.cantuscodex.maps.MapsFragment;
 import com.example.cantuscodex.notifications.NotificationJobService;
+import com.example.cantuscodex.ui.details.EventDetailsFragment;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -81,6 +87,7 @@ public class EventAdapter extends FirestoreAdapter<EventAdapter.ViewHolder> {
                 binding.tvTitleEvents.setText(event.getName());
                 binding.tvDescriptionEvents.setText(event.getDescription());
                 binding.tvOrganizersEvents.setText(event.getOrganizers());
+                binding.ivHeaderImageEvents.setImageResource(R.drawable.ic_menu_events);
                 binding.tvStartDateEvents.setText(DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.SHORT ).format(event.getStartDate().toDate()));
             }
             // Click listener

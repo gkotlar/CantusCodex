@@ -41,6 +41,8 @@
     <string name="error">Error</string>
     <string name="text_user">User</string>
     <string name="please_select_a_event">Please select a event</string>
+    <string name="menu_location">Location</string>
+    <string name="location">Location</string>
 
 
 </resources>

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
 android {
@@ -48,6 +49,9 @@ dependencies {
     implementation libs.firebase.firestore
     implementation libs.legacy.support.v4
     implementation libs.firebase.database
+    implementation libs.play.services.maps
+    implementation libs.play.services.places
+    implementation libs.places
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit

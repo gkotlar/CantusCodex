@@ -24,7 +24,6 @@ import com.example.cantuscodex.adapter.EventAdapter;
 import com.example.cantuscodex.data.events.model.Event;
 import com.example.cantuscodex.data.users.model.User;
 import com.example.cantuscodex.databinding.FragmentEventsBinding;
-import com.example.cantuscodex.databinding.FragmentEventsCombinedBinding;
 import com.example.cantuscodex.ui.details.EventDetailsFragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.Timestamp;
@@ -120,15 +119,13 @@ public class EventsFragment extends Fragment implements
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
 
-
-        }else {
+        } else {
             Navigation.findNavController(binding.getRoot()).navigate(R.id.nav_event_details, s);
         }
     }
     @Override
     public void onStart() {
         super.onStart();
-
         // Start listening for Firestore updates
         if (mAdapter != null) {
             mAdapter.startListening();
@@ -141,7 +138,6 @@ public class EventsFragment extends Fragment implements
         if (mAdapter != null) {
             mAdapter.stopListening();
         }
-
     }
     @Override
     public void onDestroyView() {
