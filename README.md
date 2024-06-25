@@ -12,4 +12,4 @@ Has the option to open the google maps application with the selected location so
 To set up the project locally one would need to install android studio, use a device with a API level higher that 33, link the project to firebase so that they can enable their own database,
 and add their google maps API key. And also give apropriate permisions when first starting the app on the device
 
-*Project photos*
+Photos of the project can be seen in the projectPhotos folder
